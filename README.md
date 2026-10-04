@@ -1,8 +1,8 @@
-# Sachet 🛡️
+# Sachet 
 
 **Sachet** is a multilingual, voice-first investment-scam checker built specifically for Indian retail investors. It helps users identify fraudulent investment schemes, fake stock tips, and phishing attempts across WhatsApp, Telegram, and SMS before they send any money.
 
-## Features ✨
+## Features 
 - **Multilingual Support:** Natively understands and translates English, Hindi, Tamil, Telugu, Bengali, and Marathi, including "Hinglish" combinations.
 - **Privacy First (On-Device Masking):** Uses client-side regex masking to scrub sensitive Personal Identifiable Information (PII) like Phone Numbers, UPI IDs, Aadhaar, PAN, and Bank Account numbers *before* anything is sent to the server.
 - **Dual Engine Architecture:**
@@ -17,7 +17,7 @@
 - **Icons:** Lucide
 - **AI Integration:** Groq API
 
-## Getting Started 🚀
+## Getting Started 
 
 ### Prerequisites
 - Node.js (v18 or higher)
@@ -46,7 +46,7 @@
 
 4. Open `http://localhost:3000` in your browser.
 
-## Security & Privacy 🔒
+## Security & Privacy 
 Sachet is designed with a defense-in-depth approach. No user messages, masked texts, or analysis results are logged or stored on the server. The client-side masking ensures that even if the server is compromised, no financial PII is exposed.
 
 ## Disclaimer ⚠️
