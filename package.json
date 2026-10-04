@@ -1,0 +1,20 @@
+{
+  "name": "sachet",
+  "version": "1.0.0",
+  "description": "Multilingual, voice-first investment-scam checker for Indian retail investors.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --env-file=.env server.js"
+  },
+  "keywords": [
+    "scam",
+    "finance",
+    "india",
+    "sebi",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}

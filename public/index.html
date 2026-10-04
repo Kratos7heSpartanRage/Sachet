@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sachet — Investment Scam Checker</title>
+  
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Telugu:wght@400;600&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Pre-apply theme to prevent flash -->
+  <script>
+    const savedTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Background Orbs for Parallax -->
+  <div class="orbs-container" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <!-- Sticky Top Bar -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="logo">
+        <i data-lucide="shield-check" class="logo-icon"></i>
+        <span>Sachet</span>
+      </div>
+      <div class="top-bar-actions">
+        <!-- Language dropdown on mobile, pills on desktop handled in CSS/JS -->
+        <div class="lang-selector-container">
+          <select id="langSelectMobile" class="lang-select-mobile" aria-label="Select Language">
+            <option value="en" selected>English</option>
+            <option value="hi">हिंदी</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+            <option value="bn">বাংলা</option>
+            <option value="mr">मराठी</option>
+          </select>
+          <div class="lang-pills-desktop" id="langPills">
+            <button class="lang-pill active" data-lang="en">EN</button>
+            <button class="lang-pill" data-lang="hi">HI</button>
+            <button class="lang-pill" data-lang="ta">TA</button>
+            <button class="lang-pill" data-lang="te">TE</button>
+            <button class="lang-pill" data-lang="bn">BN</button>
+            <button class="lang-pill" data-lang="mr">MR</button>
+            <div class="pill-indicator"></div>
+          </div>
+        </div>
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle dark mode">
+          <i data-lucide="sun" class="sun-icon"></i>
+          <i data-lucide="moon" class="moon-icon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="heroSection">
+      <h1 id="heroTitle">Pause. Check. Stay safe.</h1>
+      <p id="heroSub">Check investment messages for red flags before you send money.</p>
+      <button class="cta-scroll" id="scrollBtn">
+        <span id="heroCta">Check a message</span>
+        <i data-lucide="arrow-down"></i>
+      </button>
+      <div class="hero-trust">
+        <div class="trust-badge"><i data-lucide="shield-check"></i> 100% On-device Privacy</div>
+        <div class="trust-badge"><i data-lucide="zap"></i> AI + Offline Rules</div>
+        <div class="trust-badge"><i data-lucide="languages"></i> Multilingual</div>
+      </div>
+    </section>
+
+    <!-- Checker Area -->
+    <section class="checker-section" id="checker">
+      <div class="glass-card main-card">
+        <div class="input-area">
+          <textarea id="msgInput" placeholder="Paste a WhatsApp message, SMS, or post here..." rows="4"></textarea>
+          
+          <div id="dropZone" class="drop-zone hidden">
+            <i data-lucide="upload-cloud"></i>
+            <span id="dropText">Drag screenshot here or click to browse</span>
+            <input type="file" id="fileInput" accept="image/*" class="hidden-input">
+          </div>
+          
+          <div class="input-actions">
+            <button class="icon-btn-text active" id="btnType" aria-label="Type message">
+              <i data-lucide="keyboard"></i>
+            </button>
+            <button class="icon-btn-text" id="btnImage" aria-label="Upload image">
+              <i data-lucide="image"></i>
+            </button>
+            <button class="icon-btn-text mic-btn" id="btnVoice" aria-label="Use voice">
+              <i data-lucide="mic"></i>
+              <div class="pulse-ring"></div>
+            </button>
+          </div>
+        </div>
+        
+        <div class="card-footer">
+          <button id="btnCheck" class="btn-primary">
+            <span id="btnCheckText">Check message</span>
+            <i data-lucide="shield" class="btn-icon"></i>
+            <div class="spinner hidden"></div>
+          </button>
+        </div>
+
+        <div class="demo-links">
+          <p class="demo-title" id="demoTitle">Try an example:</p>
+          <div class="demo-chips" id="demoContainer">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div class="glass-card result-card hidden" id="resultCard" aria-live="polite">
+        <div class="result-header">
+          <div class="risk-badge" id="riskBadge">
+            <span id="riskIconContainer"><i data-lucide="alert-triangle"></i></span>
+            <span id="riskLabel">High Risk</span>
+          </div>
+          <button id="btnSpeak" class="icon-btn" aria-label="Read aloud">
+            <i data-lucide="volume-2"></i>
+          </button>
+        </div>
+        
+        <!-- Animated Gauge -->
+        <div class="risk-gauge">
+          <div class="gauge-track">
+            <div class="gauge-fill" id="gaugeFill"></div>
+          </div>
+        </div>
+
+        <div class="result-content">
+          <h3 id="flagsTitle" class="section-title">Red flags found</h3>
+          <div id="redFlags" class="chips-container"></div>
+          
+          <div class="explanation" id="explanationText"></div>
+          
+          <h3 id="nextTitle" class="section-title">What to do next</h3>
+          <ul id="nextSteps" class="checklist"></ul>
+          
+          <div class="uncertainty-note">
+            <i data-lucide="info"></i>
+            <span id="uncertaintyText">This is an automated check based on patterns and AI. It can be wrong. It is not legal or financial advice — always verify through official SEBI sources.</span>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <a href="https://cybercrime.gov.in" target="_blank" class="btn-ghost">
+            <span id="btnCyber">Report on cybercrime.gov.in</span>
+            <i data-lucide="arrow-right"></i>
+          </a>
+          <a href="https://sebi.gov.in/intermediaries.html" target="_blank" class="btn-ghost">
+            <span id="btnSebi">Verify on SEBI</span>
+            <i data-lucide="arrow-right"></i>
+          </a>
+          <button id="btnReset" class="btn-ghost reset-btn">
+            <i data-lucide="rotate-ccw"></i>
+            <span id="btnResetText">Check another message</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="info-section">
+      <h2 id="howTitle" class="section-heading">How it works</h2>
+      <div class="grid-3">
+        <div class="info-card reveal">
+          <div class="info-icon"><i data-lucide="copy"></i></div>
+          <h3 id="how1Title">1. Paste</h3>
+          <p id="how1Desc">Copy any suspicious message from WhatsApp, Telegram, or SMS and paste it above.</p>
+        </div>
+        <div class="info-card reveal">
+          <div class="info-icon"><i data-lucide="cpu"></i></div>
+          <h3 id="how2Title">2. Analyze</h3>
+          <p id="how2Desc">Our AI and rule engine check for common scam patterns instantly.</p>
+        </div>
+        <div class="info-card reveal">
+          <div class="info-icon"><i data-lucide="shield-alert"></i></div>
+          <h3 id="how3Title">3. Act</h3>
+          <p id="how3Desc">Get clear next steps and links to official verification portals.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy -->
+    <section class="info-section privacy-section">
+      <h2 id="privacyTitle" class="section-heading">Your Privacy</h2>
+      <div class="grid-3">
+        <div class="trust-point reveal">
+          <i data-lucide="eye-off"></i>
+          <span id="priv1">Nothing is stored.</span>
+        </div>
+        <div class="trust-point reveal">
+          <i data-lucide="lock"></i>
+          <span id="priv2">Personal details (phone, UPI) masked on device.</span>
+        </div>
+        <div class="trust-point reveal">
+          <i data-lucide="trending-down"></i>
+          <span id="priv3">No stock tips or promotions, ever.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features / Trust Section -->
+    <section class="features-section">
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon-wrapper">
+            <i data-lucide="shield"></i>
+          </div>
+          <h3>100% Private</h3>
+          <p>Your phone numbers, PAN, Aadhaar, and UPI IDs are masked locally on your device before analysis.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon-wrapper">
+            <i data-lucide="zap"></i>
+          </div>
+          <h3>Instant AI Analysis</h3>
+          <p>Powered by ultra-fast LLMs to cross-check thousands of known scam patterns in milliseconds.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon-wrapper">
+            <i data-lucide="globe"></i>
+          </div>
+          <h3>Multilingual</h3>
+          <p>Understands Hindi, Tamil, Telugu, Bengali, Marathi, and Hinglish natively.</p>
+        </div>
+      </div>
+      
+      <div class="trust-banner reveal">
+        <p class="trust-text">Backed by rules from official SEBI and RBI advisories.</p>
+        <div class="trust-logos">
+          <!-- Placeholder logos for visual premium feel -->
+          <div class="trust-badge"><i data-lucide="check-circle-2"></i> Verified Patterns</div>
+          <div class="trust-badge"><i data-lucide="lock"></i> Offline Fallback</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p id="footerText">Sachet gives guidance, not financial advice.</p>
+  </footer>
+
+  <script src="js/rules.js?v=3"></script>
+  <script src="js/i18n.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

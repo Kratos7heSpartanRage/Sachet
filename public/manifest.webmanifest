@@ -1,0 +1,10 @@
+{
+  "name": "Sachet — Investment Scam Checker",
+  "short_name": "Sachet",
+  "description": "Multilingual, voice-first investment-scam checker for Indian retail investors.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1f",
+  "theme_color": "#0a0f1f",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
